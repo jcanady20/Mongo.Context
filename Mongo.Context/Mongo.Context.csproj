@@ -53,7 +53,6 @@
     <Compile Include="Extensions\PropertyHelpers.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="IMongoBuilder.cs" />
-    <Compile Include="IMongoConnectionProperties.cs" />
     <Compile Include="IMongoSet.cs" />
     <Compile Include="Internal\AccessFactory.cs" />
     <Compile Include="Internal\IEntityType.cs" />
