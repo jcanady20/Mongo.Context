@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Mongo.Context.Example.Entities
 {
@@ -14,5 +11,7 @@ namespace Mongo.Context.Example.Entities
         public Gender Gender { get; set; }
         public string Phone { get; set; }
         public bool IsDeleted { get; set; }
+
+        public Address Address { get; set; }
     }
 }

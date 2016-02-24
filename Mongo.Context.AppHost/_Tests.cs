@@ -116,7 +116,14 @@ namespace Mongo.Context.AppHost
                 Name = name,
                 Phone = phone,
                 Email = email,
-                Gender = gender
+                Gender = gender,
+                Address = new Address()
+                {
+                    Street1 = "1500 Orange Avenue",
+                    City = "Coronado",
+                    State = "CA",
+                    Postal = "92118"
+                }
             };
             return contact;
         }
