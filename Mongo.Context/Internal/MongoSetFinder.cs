@@ -36,10 +36,5 @@ namespace Mongo.Context.Internal
                     r.SetMethod == null ? null : setterFactory.Create(r))
                 ).ToArray();
         }
-
-        internal IEnumerable<object> Where(Func<object, bool> p)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

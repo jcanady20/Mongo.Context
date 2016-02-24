@@ -1,5 +1,4 @@
-﻿using Mongo.Context.Extensions;
-using System;
+﻿using System;
 using System.Data.Entity.Design.PluralizationServices;
 
 namespace Mongo.Context.Internal
