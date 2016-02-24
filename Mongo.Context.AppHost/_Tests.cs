@@ -22,12 +22,24 @@ namespace Mongo.Context.AppHost
             }
         }
 
+        static void All()
+        {
+            using (var db = new Example.Context(_mongourl))
+            {
+                var contacts = db.Contacts.ToList();
+                foreach(var contact in contacts)
+                {
+                    Console.WriteLine(contact?.ToJson() ?? $"Unable to find record");
+                }
+            }
+        }
+
         static void FindFirst()
         {
             using (var db = new Example.Context(_mongourl))
             {
                 var contact = db.Contacts.FirstOrDefault();
-                Console.WriteLine(contact?.ToJson() ?? $"Unable to a find");
+                Console.WriteLine(contact?.ToJson() ?? $"Unable to find any records");
             }
         }
 
@@ -87,19 +99,24 @@ namespace Mongo.Context.AppHost
 
         static Contact CreateRandomContact()
         {
-            var name = NameGenerator.Instance.GenerateFullName(Gender.Male);
+            var random = new Random();
+            var gender = (random.Next(1,100) % 2 == 0) ? Gender.Male : Gender.Female;
+            var fName = NameGenerator.Instance.GenerateFirstName(gender);
+            var lName = NameGenerator.Instance.GenerateLastName();
             var phone = PhoneGenerator.GenerateRandomPhone();
-            var email = name.Replace(' ', '.') + "@gmail.com";
-            return CreateContact(name, phone, email);
+            var name = $"{fName} {lName}";
+            var email = $"{fName}.{lName}@gmail.com";
+            return CreateContact(name, phone, email, gender);
         }
 
-        static Contact CreateContact(string name, string phone, string email)
+        static Contact CreateContact(string name, string phone, string email, Gender gender)
         {
             var contact = new Contact
             {
                 Name = name,
                 Phone = phone,
-                Email = email
+                Email = email,
+                Gender = gender
             };
             return contact;
         }
