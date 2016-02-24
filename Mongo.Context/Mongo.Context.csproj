@@ -73,7 +73,6 @@
     <Compile Include="Mapping\MongoIndex.cs" />
     <Compile Include="MongoBuilder.cs" />
     <Compile Include="MongoContext.cs" />
-    <Compile Include="Mapping\MongoIndexAttribute.cs" />
     <Compile Include="MongoSet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
