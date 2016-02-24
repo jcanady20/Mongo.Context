@@ -7,6 +7,7 @@ namespace Mongo.Context
 {
     public interface IMongoSet<TEntity> : IQueryable<TEntity>, IQueryable, IEnumerable<TEntity> where TEntity : class
     {
+        string CollectionName { get; }
         void Insert(TEntity item);
         void InsertBatch(IEnumerable<TEntity> items);
         long Remove(Expression<Func<TEntity, bool>> criteria);

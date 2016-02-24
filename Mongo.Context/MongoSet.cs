@@ -43,6 +43,8 @@ namespace Mongo.Context
             }
         }
 
+        public string CollectionName { get { return _collectionName; } }
+
         public IEnumerator<TEntity> GetEnumerator()
         {
             return Collection.FindAllAs<TEntity>().GetEnumerator();
