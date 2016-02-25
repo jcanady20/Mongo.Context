@@ -40,9 +40,10 @@ namespace Mongo.Context
             {
                 OnRegisterClasses(builder);
             }
-            builder.BuildIndexes();
+            builder.InitializeSets();
+            builder.InitializeIndexes();
         }
-        
+
         private string DatabaseName(string databaseName = null)
         {
             if (String.IsNullOrEmpty(databaseName) == false)

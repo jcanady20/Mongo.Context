@@ -1,4 +1,7 @@
-﻿using System.Linq;
+﻿using Mongo.Context.Mapping;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Mongo.Context.Internal
 {
@@ -17,11 +20,12 @@ namespace Mongo.Context.Internal
             return (MongoSet<TEntity>)_setSource.Create(context, collectionName,  typeof(TEntity));
         }
 
-        public void InitializeSets(MongoContext context)
+        public void InitializeSets(MongoContext context, IDictionary<Type, MongoClassMap> classMaps)
         {
             foreach (var setInfo in _setFinder.FindSets(context).Where(x => x.Setter != null))
             {
-                setInfo.Setter.SetValue(context, _setSource.Create(context, setInfo.CollectionName, setInfo.EntityType));
+                var cm = classMaps[setInfo.EntityType];
+                setInfo.Setter.SetValue(context, _setSource.Create(context, cm?.CollectionName ?? setInfo.CollectionName, setInfo.EntityType));
             }
         }
     }

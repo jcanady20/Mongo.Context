@@ -15,7 +15,6 @@ namespace Mongo.Context
         {
             _contextType = context.GetType();
             _context = context;
-            InitializeSets();
         }
 
         public bool IsFrozen
@@ -26,15 +25,15 @@ namespace Mongo.Context
             }
         }
 
-        private void InitializeSets()
+        public void InitializeSets()
         {
             var setFinder = new Internal.MongoSetFinder();
             var setSource = new Internal.MongoSetSource();
             var setInitializer = new Internal.MongoSetInitializer(setFinder, setSource);
-            setInitializer.InitializeSets(_context);
+            setInitializer.InitializeSets(_context, _typeClassMaps);
         }
 
-        public void BuildIndexes()
+        public void InitializeIndexes()
         {
             var setFinder = new Internal.MongoSetFinder();
             foreach (var setinfo in setFinder.FindSets(_context))
@@ -44,7 +43,7 @@ namespace Mongo.Context
                 {
                     continue;
                 }
-                _context.EnsureIndexes(setinfo.CollectionName, mcm.Indexes);
+                _context.EnsureIndexes(mcm.CollectionName, mcm.Indexes);
             }
         }
 
