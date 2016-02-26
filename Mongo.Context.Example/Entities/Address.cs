@@ -4,6 +4,7 @@
     {
         public Address()
         {
+            Id = MongoId.GenerateId();
             Enable = true;
         }
         public string Id { get; set; }
