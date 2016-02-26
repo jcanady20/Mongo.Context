@@ -20,6 +20,18 @@ namespace Mongo.Context.Mapping
             return (TEntity)base.CreateInstance();
         }
 
+        public new MongoClassMap<TEntity> SetCollectionName(string collectionName)
+        {
+            _collectionName = collectionName;
+            return this;
+        }
+
+        public new MongoClassMap<TEntity> AddIndex(MongoIndex index)
+        {
+            _indexes.Add(index);
+            return this;
+        }
+
         public BsonMemberMap GetPropertyMap<TMember>(Expression<Func<TEntity, TMember>> expression)
         {
             var memberName = GetMemberNameFromExpression(expression);
@@ -44,7 +56,6 @@ namespace Mongo.Context.Mapping
             var memberInfo = GetMemberInfoFromExpression(expression);
             UnmapMember(memberInfo);
         }
-
 
         private static MemberInfo GetMemberInfoFromExpression<TMember>(Expression<Func<TEntity, TMember>> memberLambda)
         {

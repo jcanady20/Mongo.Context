@@ -1,13 +1,14 @@
 ﻿using MongoDB.Bson.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Mongo.Context.Mapping
 {
     public class MongoClassMap : BsonClassMap
     {
-        private IEnumerable<MongoIndex> _indexes = new List<MongoIndex>();
-        private string _collectionName;
+        protected ICollection<MongoIndex> _indexes = new List<MongoIndex>();
+        protected string _collectionName;
         public MongoClassMap(Type classType) : base(classType)
         { }
 
@@ -31,13 +32,20 @@ namespace Mongo.Context.Mapping
             }
             set
             {
-                _indexes = value;
+                _indexes = value.ToList();
             }
         }
 
-        public void SetCollectionName(string collectionName)
+        public MongoClassMap SetCollectionName(string collectionName)
         {
             _collectionName = collectionName;
+            return this;
+        }
+
+        public MongoClassMap AddIndex(MongoIndex index)
+        {
+            _indexes.Add(index);
+            return this;
         }
     }
 }

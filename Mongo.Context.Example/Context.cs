@@ -15,16 +15,20 @@ namespace Mongo.Context.Example
 
             //  Manual Mapping for an Element
             var clsmap = mongoBuilder
-                .Entry<Entities.Contact>();
-            clsmap.SetCollectionName("SuperContacts");
+                .Entry<Entities.Contact>()
+                .SetCollectionName("SuperContacts");
             clsmap.MapProperty(x => x.Gender)
                 .SetElementName("g");
             //  Adding an Index to a Collection
             mongoBuilder.Entry<Entities.Contact>()
                 .Indexes = new[] {
-                    new Mapping.MongoIndex() { Keys = new[] { "Name" } },
-                    new Mapping.MongoIndex() { Keys = new[] { "Phone" } }
+                    new MongoIndex() { Keys = new[] { "Name" } }
                 };
+            mongoBuilder.Entry<Entities.Contact>()
+                .AddIndex(new MongoIndex()
+                {
+                    Keys = new[] { "Phone" }
+                });
         }
     }
 }
