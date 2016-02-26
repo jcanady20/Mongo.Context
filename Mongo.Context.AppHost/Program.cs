@@ -14,14 +14,14 @@ namespace Mongo.Context.AppHost
         //	An internal pointer to the current Instance of the class
         //	used to reference Program and avoid using Activator Create Instance Calls
         //	'this' will not work for static method calls
-        protected static Program m_this;
-        protected static string m_prompt = ":>";
-        protected static Type m_type = typeof(Program);
-        protected static List<MethodInfo> m_methods = null;
+        protected static Program _this;
+        protected static string _prompt = ":>";
+        protected static Type _type = typeof(Program);
+        protected static List<MethodInfo> _methods = null;
 
         internal Program()
         {
-            m_this = this;
+            _this = this;
         }
 
         [STAThread]
@@ -47,15 +47,19 @@ namespace Mongo.Context.AppHost
 
         static void MainLoop()
         {
+            Help();
             bool pContinue = true;
             while (pContinue)
             {
-                Console.Write(m_prompt);
+                Console.Write(_prompt);
 
                 //string[] Coms = Console.ReadLine().Split(new char[] { ' ' });
-                var parms = ParseCommand(Console.ReadLine());
+                var parms = ParseInput(Console.ReadLine());
                 if (parms.Length == 0)
+                {
+                    Help();
                     continue;
+                }
 
                 switch (parms[0].ToLower())
                 {
@@ -70,7 +74,7 @@ namespace Mongo.Context.AppHost
                 Console.WriteLine("");
             }
         }
-        static string[] ParseCommand(string args)
+        static string[] ParseInput(string args)
         {
             var parts = Regex.Matches(args, @"[\""].+?[\""]|[^ ]+")
                 .Cast<Match>()
@@ -83,7 +87,7 @@ namespace Mongo.Context.AppHost
             string CallingMethod = args[0];
             var parms = args.Skip(1).Take(args.Count() - 1).ToArray();
 
-            var method = m_methods.FirstOrDefault(x => String.Compare(x.Name, CallingMethod, true) == 0 && x.GetParameters().Length == parms.Length);
+            var method = _methods.FirstOrDefault(x => String.Compare(x.Name, CallingMethod, true) == 0 && x.GetParameters().Length == parms.Length);
             //	Abandon the call if we didn't find a match
             if (method == null)
             {
@@ -94,7 +98,7 @@ namespace Mongo.Context.AppHost
 
             try
             {
-                method.Invoke(m_this, parms);
+                method.Invoke(_this, parms);
                 return;
             }
             catch (Exception e)
@@ -112,7 +116,7 @@ namespace Mongo.Context.AppHost
         static void Help()
         {
             Console.WriteLine("Valid Commands");
-            foreach (MethodInfo m in m_methods)
+            foreach (MethodInfo m in _methods)
             {
                 DescriptionAttribute[] attribs = (DescriptionAttribute[])m.GetCustomAttributes(typeof(DescriptionAttribute), false);
                 if (attribs != null && attribs.Length > 0)
@@ -144,41 +148,6 @@ namespace Mongo.Context.AppHost
         static void Quit()
         {
             return;
-        }
-        [Description("List Local Drives")]
-        static void LocalDrives()
-        {
-            string[] drives = Environment.GetLogicalDrives();
-            IEnumerable<string> strs = drives.Select(s => s.Replace(":\\", ""));
-            foreach (String s in strs)
-            {
-                System.IO.DriveInfo drvi = new System.IO.DriveInfo(s);
-                if (drvi.DriveType == DriveType.CDRom)
-                    continue;
-                Console.WriteLine("{0}:\\", s);
-            }
-        }
-        [Description("List Available Providers")]
-        static void LocalProviders()
-        {
-            var dt = System.Data.Common.DbProviderFactories.GetFactoryClasses();
-            //	Name Description InvariantName
-            Console.WriteLine("{0} {1} {2}", "", "Name", "InvariantName");
-            Console.WriteLine("-------------------------------------");
-            foreach (System.Data.DataRow dr in dt.Rows)
-            {
-                Console.WriteLine("{0} {1} {2}", "", dr["Name"], dr["InvariantName"]);
-            }
-        }
-        [Description("Open Application Log Folder")]
-        static void OpenLogFolder()
-        {
-            var path = Path.Combine(GetCurrentPath(), "ApplicationLogs");
-            if (Directory.Exists(path) == false)
-            {
-                path = GetCurrentPath();
-            }
-            Process.Start(path);
         }
 
         static void writeHeader<T>(T data)
@@ -280,7 +249,7 @@ namespace Mongo.Context.AppHost
         }
         static void CreateMethodCache()
         {
-            m_methods = m_type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic).ToList();
+            _methods = _type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic).ToList();
         }
         static void AddTraceListeners()
         {

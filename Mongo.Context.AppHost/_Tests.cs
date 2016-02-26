@@ -4,12 +4,14 @@ using Mongo.Context.Example;
 using Mongo.Context.Example.NameGenerator;
 using Mongo.Context.Example.Entities;
 using Mongo.Context.AppHost.Extensions;
+using System.ComponentModel;
 
 namespace Mongo.Context.AppHost
 {
     public partial class Program
     {
         static string _mongourl = "mongodb://localhost:27017/DataTests";
+        [Description("Addes a new Contact to the Database")]
         static void AddOne()
         {
             using (var db = new Example.Context(_mongourl))
@@ -21,7 +23,7 @@ namespace Mongo.Context.AppHost
                 Console.WriteLine(contact?.ToJson());
             }
         }
-
+        [Description("Returns all Contacts")]
         static void All()
         {
             using (var db = new Example.Context(_mongourl))
@@ -33,7 +35,7 @@ namespace Mongo.Context.AppHost
                 }
             }
         }
-
+        [Description("Returns the first Contact in the Collection")]
         static void FindFirst()
         {
             using (var db = new Example.Context(_mongourl))
@@ -45,7 +47,7 @@ namespace Mongo.Context.AppHost
                 FindOne(contact.Id);
             }
         }
-
+        [Description("Returns the first Contact that matches the given Id value")]
         static void FindOne(string id)
         {
             using (var db = new Example.Context(_mongourl))
@@ -54,7 +56,7 @@ namespace Mongo.Context.AppHost
                 Console.WriteLine(contact?.ToJson() ?? $"Unable to find Contact with specified Id [{id}]");
             }
         }
-
+        [Description("Removes a Contact from the collection based on the given Id value")]
         static void RemoveOne(string id)
         {
             using (var db = new Example.Context(_mongourl))
@@ -68,7 +70,7 @@ namespace Mongo.Context.AppHost
                 db.Contacts.Remove(contact);
             }
         }
-
+        [Description("Adds 1000 Contacts to the Collection")]
         static void AddLots()
         {
             using (var db = new Example.Context(_mongourl))
@@ -88,7 +90,7 @@ namespace Mongo.Context.AppHost
                 Console.WriteLine("Total Contact Count {0}", x);
             }
         }
-
+        [Description("Remove All Contacts from the Collection")]
         static void RemoveAll()
         {
             using (var db = new Example.Context(_mongourl))
