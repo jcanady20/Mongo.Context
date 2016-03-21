@@ -43,7 +43,7 @@ namespace Mongo.Context.AppHost
                 var contact = db.Contacts.FirstOrDefault();
                 Console.WriteLine(contact?.ToJson() ?? $"Unable to find any records");
                 contact.Phone = PhoneGenerator.GenerateRandomPhone();
-                db.Contacts.Save(contact);
+                db.Contacts.Save(x => x.Id == contact.Id, contact);
                 FindOne(contact.Id);
             }
         }

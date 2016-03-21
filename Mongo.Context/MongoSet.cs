@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 using MongoDB.Driver.Linq;
 using MongoDB.Bson;
 using Mongo.Context.Extensions;
@@ -35,7 +34,7 @@ namespace Mongo.Context
         /// <summary>
         /// Underlying MongoCollection for this MongoSet
         /// </summary>
-        protected MongoCollection<TEntity> Collection
+        protected IMongoCollection<TEntity> Collection
         {
             get
             {
@@ -47,7 +46,7 @@ namespace Mongo.Context
 
         public IEnumerator<TEntity> GetEnumerator()
         {
-            return Collection.FindAllAs<TEntity>().GetEnumerator();
+            return Collection.AsQueryable().GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -79,6 +78,11 @@ namespace Mongo.Context
             }
         }
 
+        public TEntity FindOne(Expression<Func<TEntity, bool>> filter)
+        {
+            return this.Collection.Find(filter).FirstOrDefault();
+        }
+
         /// <summary>
         /// Inserts a new item
         /// </summary>
@@ -86,7 +90,7 @@ namespace Mongo.Context
         /// <exception cref="MongoDB.Drive.MongoException" />
         public void Insert(TEntity item)
         {
-            this.Collection.Insert<TEntity>(item);
+            this.Collection.InsertOne(item);
         }
 
         /// <summary>
@@ -95,16 +99,12 @@ namespace Mongo.Context
         /// <param name="items">The items to insert</param>
         public void InsertBatch(IEnumerable<TEntity> items)
         {
-            this.Collection.InsertBatch<TEntity>(items);
+            this.Collection.InsertMany(items);
         }
 
-        /// <summary>
-        /// Saves the item
-        /// </summary>
-        /// <param name="item">The item to save</param>
-        public void Save(TEntity item)
+        public void Save(Expression<Func<TEntity, bool>> filter, TEntity item)
         {
-            this.Collection.Save<TEntity>(item);
+            this.Collection.ReplaceOne(filter, item);
         }
 
         /// <summary>
@@ -121,10 +121,10 @@ namespace Mongo.Context
             }
             var value = classMap.IdMemberMap.Getter(item);
             var elName = classMap.IdMemberMap.ElementName;
-
-            var qry = Query.EQ(elName, BsonValue.Create(value));
-            var result = Collection.Remove(qry);
-            return result.DocumentsAffected;
+            var filter = new BsonDocument();
+            filter.Add(elName, BsonValue.Create(value));
+            var result = Collection.DeleteMany(filter);
+            return result.DeletedCount;
         }
 
         /// <summary>
@@ -134,10 +134,8 @@ namespace Mongo.Context
         /// <returns>The number of records affected. If WriteConcern is unacknowledged -1 is returned</returns>
         public long Remove(Expression<Func<TEntity, bool>> criteria)
         {
-            var queryable = this.Collection.AsQueryable<TEntity>().Where(criteria);
-            var query = ((MongoQueryProvider)this.Provider).BuildMongoQuery<TEntity>((MongoQueryable<TEntity>)queryable);
-            var result = this.Collection.Remove(query);
-            return result.DocumentsAffected;
+            var result = this.Collection.DeleteMany(criteria);
+            return result.DeletedCount;
         }
 
         /// <summary>
@@ -147,38 +145,9 @@ namespace Mongo.Context
         /// <remarks>Careful this deletes everything in the MongoSet/Collection!</remarks>
         public long RemoveAll()
         {
-            var result = Collection.RemoveAll();
-            return result.DocumentsAffected;
-        }
-
-        /// <summary>
-        /// Update one property of an object.
-        /// </summary>
-        /// <typeparam name="TMember">The type of the property to be updated</typeparam>
-        /// <param name="propertySelector">The property selector expression</param>
-        /// <param name="value">New value of the property</param>
-        /// <param name="criteria">Criteria to update documents based on</param>
-        /// <returns>The number of records affected. If WriteConcern is unacknowledged -1 is returned</returns>
-        public long Update<TMember>(Expression<Func<TEntity, TMember>> propertySelector, TMember value, Expression<Func<TEntity, bool>> criteria)
-        {
-            var updateBuilder = new UpdateBuilder<TEntity>();
-            updateBuilder.Set<TMember>(propertySelector, value);
-            return this.Update(updateBuilder, criteria);
-        }
-
-        /// <summary>
-        /// Update with UpdateBuilder. Use MongoSet<typeparamref name"T"/>.Set().Set()... to build update
-        /// </summary>
-        /// <param name="update">The update object</param>
-        /// <param name="criteria">Criteria to update documents based on</param>
-        /// <returns></returns>
-        private long Update(UpdateBuilder<TEntity> update, Expression<Func<TEntity, bool>> criteria)
-        {
-            var queryable = this.Collection.AsQueryable<TEntity>().Where(criteria);
-            var query = ((MongoQueryProvider)this.Provider).BuildMongoQuery<TEntity>((MongoQueryable<TEntity>)queryable);
-            var flags = UpdateFlags.Multi;
-            var result = this.Collection.Update(query, update, flags);
-            return result.DocumentsAffected;
+            var filter = new BsonDocument();
+            var result = Collection.DeleteMany(filter);
+            return result.DeletedCount;
         }
 
         public string GetElementName(Expression<Func<TEntity, object>> propertyExpression)
@@ -205,8 +174,15 @@ namespace Mongo.Context
             {
                 throw new ArgumentNullException(nameof(classMap));
             }
-            var value = classMap.IdMemberMap.Getter(item);
-            var result = Collection.FindOneByIdAs<TEntity>(BsonValue.Create(value));
+            var idMap = classMap.IdMemberMap;
+            if (idMap == null)
+            {
+                throw new ArgumentNullException(nameof(classMap));
+            }
+            var value = idMap.Getter(item);
+            var filter = new BsonDocument();
+            filter.Add(idMap.ElementName, BsonValue.Create(value));
+            var result = Collection.Find<TEntity>(filter);
             return result != null;
         }
     }

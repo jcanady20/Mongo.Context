@@ -1,6 +1,7 @@
 ﻿using Mongo.Context.Mapping;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.IdGenerators;
-
+using MongoDB.Bson.Serialization.Serializers;
 
 namespace Mongo.Context.Example.Maps
 {
@@ -11,7 +12,7 @@ namespace Mongo.Context.Example.Maps
             AutoMap();
             SetIgnoreExtraElements(true);
             MapIdProperty(x => x.Id)
-                .SetRepresentation(MongoDB.Bson.BsonType.ObjectId)
+                .SetSerializer(new StringSerializer(BsonType.ObjectId))
                 .SetIdGenerator(StringObjectIdGenerator.Instance);
         }
     }

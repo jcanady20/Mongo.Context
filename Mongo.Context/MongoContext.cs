@@ -1,7 +1,7 @@
 ﻿using Mongo.Context.Extensions;
 using Mongo.Context.Mapping;
+using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,9 +25,9 @@ namespace Mongo.Context
             RegisterClasses();
         }
 
-        public MongoDatabase GetDatabase()
+        public IMongoDatabase GetDatabase()
         {
-            return _client.GetServer().GetDatabase(_databaseName);
+            return _client.GetDatabase(_databaseName);
         }
 
         protected virtual void OnRegisterClasses(MongoBuilder mongoBuilder)
@@ -72,20 +72,23 @@ namespace Mongo.Context
 
             foreach (var idx in indexes)
             {
-                var indexKeysBuilder = new IndexKeysBuilder();
-                IndexOptionsBuilder indexOptionsBuilder = new IndexOptionsBuilder();
-                if (idx.Unique)
+                var options = new CreateIndexOptions();
+                var indexBuilder = Builders<BsonDocument>.IndexKeys;
+                var keydefs = new List<IndexKeysDefinition<BsonDocument>>();
+                foreach(var key in idx.Keys)
                 {
-                    indexOptionsBuilder.SetUnique(idx.Unique);
+                    keydefs.Add((idx.Desending) ? indexBuilder.Descending("key") : indexBuilder.Ascending(key));
                 }
+                var indexDefinition = indexBuilder.Combine(keydefs);
+                options.Unique = idx.Unique;
+                
                 if (idx.TimeToLive > -1)
                 {
-                    TimeSpan timeToLive = new TimeSpan(0, 0, idx.TimeToLive);
-                    indexOptionsBuilder.SetTimeToLive(timeToLive);
+                    options.ExpireAfter = new TimeSpan(0, 0, idx.TimeToLive);
                 }
 
-                var collection = GetDatabase().GetCollection(collectionName);
-                collection.CreateIndex(idx.Desending ? indexKeysBuilder.Descending(idx.Keys.ToArray()) : indexKeysBuilder.Ascending(idx.Keys.ToArray()), indexOptionsBuilder);
+                var collection = GetDatabase().GetCollection<BsonDocument>(collectionName);
+                collection.Indexes.CreateOne(indexDefinition, options);
             }
         }
 
