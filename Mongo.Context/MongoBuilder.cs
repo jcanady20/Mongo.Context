@@ -11,10 +11,12 @@ namespace Mongo.Context
         private Type _contextType;
         private MongoContext _context;
         private readonly static IDictionary<Type, MongoClassMap> _typeClassMaps = new Dictionary<Type, MongoClassMap>();
+        private readonly Internal.IMongoSetFinder _setFinder;
         public MongoBuilder(MongoContext context)
         {
             _contextType = context.GetType();
             _context = context;
+            _setFinder = new Internal.MongoSetFinder();
         }
 
         public bool IsFrozen
@@ -27,16 +29,14 @@ namespace Mongo.Context
 
         public void InitializeSets()
         {
-            var setFinder = new Internal.MongoSetFinder();
             var setSource = new Internal.MongoSetSource();
-            var setInitializer = new Internal.MongoSetInitializer(setFinder, setSource);
+            var setInitializer = new Internal.MongoSetInitializer(_setFinder, setSource);
             setInitializer.InitializeSets(_context, _typeClassMaps);
         }
 
         public void InitializeIndexes()
         {
-            var setFinder = new Internal.MongoSetFinder();
-            foreach (var setinfo in setFinder.FindSets(_context))
+            foreach (var setinfo in _setFinder.FindSets(_context))
             {
                 var mcm = _typeClassMaps[setinfo.EntityType];
                 if(mcm == null)

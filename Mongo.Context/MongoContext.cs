@@ -4,7 +4,6 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Mongo.Context
 {
@@ -84,7 +83,7 @@ namespace Mongo.Context
                 
                 if (idx.TimeToLive > -1)
                 {
-                    options.ExpireAfter = new TimeSpan(0, 0, idx.TimeToLive);
+                    options.ExpireAfter = TimeSpan.FromSeconds(idx.TimeToLive);
                 }
 
                 var collection = GetDatabase().GetCollection<BsonDocument>(collectionName);
