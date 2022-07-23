@@ -76,7 +76,7 @@ namespace Mongo.Context
                 var keydefs = new List<IndexKeysDefinition<BsonDocument>>();
                 foreach(var key in idx.Keys)
                 {
-                    keydefs.Add((idx.Desending) ? indexBuilder.Descending(key) : indexBuilder.Ascending(key));
+                    keydefs.Add((idx.Descending) ? indexBuilder.Descending(key) : indexBuilder.Ascending(key));
                 }
                 var indexDefinition = indexBuilder.Combine(keydefs);
                 options.Unique = idx.Unique;
