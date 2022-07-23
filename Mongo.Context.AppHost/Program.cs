@@ -32,9 +32,7 @@ namespace Mongo.Context.AppHost
 
             Console.Clear();
             Console.ForegroundColor = ConsoleColor.White;
-            Console.BufferHeight = 300;
-            //Console.BufferWidth = 100;
-            Console.Title = "Phytel.Mongo.TestHarness";
+            Console.Title = "Mongo.TestHarness";
 
             if (args.Length > 0)
             {

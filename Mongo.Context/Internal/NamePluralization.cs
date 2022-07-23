@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Data.Entity.Design.PluralizationServices;
-
+//  https://github.com/microsoft/referencesource/blob/5697c29004a34d80acdaf5742d7e699022c64ecd/System.Data.Entity.Design/System/Data/Entity/Design/PluralizationService/EnglishPluralizationService.cs#L20
 namespace Mongo.Context.Internal
 {
     internal static class NamePluralization

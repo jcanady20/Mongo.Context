@@ -8,10 +8,10 @@ namespace Mongo.Context.Example.NameGenerator
         private static readonly Random _random = new Random();
         private static readonly object _lockObj = new object();
         private static NameGenerator _instance;
-        private Names _names;
+        private readonly Names _names;
         private NameGenerator()
         {
-            _names = Names.Create();
+            _names = new Names();
         }
 
         public static NameGenerator Instance

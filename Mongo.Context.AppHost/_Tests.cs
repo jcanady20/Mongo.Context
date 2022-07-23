@@ -11,7 +11,7 @@ namespace Mongo.Context.AppHost
     public partial class Program
     {
         static string _mongourl = "mongodb://localhost:27017/DataTests";
-        [Description("Addes a new Contact to the Database")]
+        [Description("Adds a new Contact to the Database")]
         static void AddOne()
         {
             using (var db = new Example.Context(_mongourl))

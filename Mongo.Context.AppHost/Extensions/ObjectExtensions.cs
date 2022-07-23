@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json;
 using System;
 using System.IO;
 using System.Text;
@@ -22,8 +22,8 @@ namespace Mongo.Context.AppHost.Extensions
             {
                 return default(T);
             }
-            var serialized = JsonConvert.SerializeObject(source);
-            return JsonConvert.DeserializeObject<T>(serialized);
+            var serialized = JsonSerializer.Serialize(source);
+            return JsonSerializer.Deserialize<T>(serialized);
         }
 
         public static string ToXml<T>(this T obj)
@@ -47,50 +47,14 @@ namespace Mongo.Context.AppHost.Extensions
             return xml;
         }
 
-        public static string ToJson(this object obj, bool addFormating = false)
+        public static string ToJson<T>(this T obj, bool addFormatting = false)
         {
-            var serializer = new JsonStringify(obj);
-            if (addFormating)
-            {
-                serializer.Formatting = Newtonsoft.Json.Formatting.Indented;
-
-            }
-            return serializer.ToString();
-        }
-
-        internal class JsonStringify
-        {
-            private JsonStringify()
-            {
-                this.Formatting = Newtonsoft.Json.Formatting.None;
-            }
-            public JsonStringify(object data) : this()
-            {
-                this.Data = data;
-            }
-            private object Data { get; set; }
-            public Newtonsoft.Json.Formatting Formatting { get; set; }
-            public override string ToString()
-            {
-                var objectString = string.Empty;
-                if (Data != null)
-                {
-                    using (var ms = new System.IO.MemoryStream())
-                    {
-                        using (System.IO.TextWriter tw = new System.IO.StreamWriter(ms))
-                        {
-                            using (var writer = new JsonTextWriter(tw) { Formatting = Formatting })
-                            {
-                                var serializer = JsonSerializer.Create();
-                                serializer.Serialize(writer, Data);
-                                writer.Flush();
-                            }
-                        }
-                        objectString = ASCIIEncoding.ASCII.GetString(ms.ToArray());
-                    }
-                }
-                return objectString;
-            }
+            if (obj is null) return "{}";
+            var jsonSettings = new System.Text.Json.JsonSerializerOptions();
+            jsonSettings.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            jsonSettings.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+            jsonSettings.WriteIndented = addFormatting;
+            return JsonSerializer.Serialize<T>(obj);
         }
     }
 }

@@ -80,14 +80,15 @@ namespace Mongo.Context
                 }
                 var indexDefinition = indexBuilder.Combine(keydefs);
                 options.Unique = idx.Unique;
-                
+
                 if (idx.TimeToLive > -1)
                 {
                     options.ExpireAfter = TimeSpan.FromSeconds(idx.TimeToLive);
                 }
 
                 var collection = GetDatabase().GetCollection<BsonDocument>(collectionName);
-                collection.Indexes.CreateOne(indexDefinition, options);
+                var indexModel = new CreateIndexModel<BsonDocument>(indexDefinition, options);
+                collection.Indexes.CreateOne(indexModel);
             }
         }
 
