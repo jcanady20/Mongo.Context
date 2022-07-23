@@ -11,7 +11,7 @@ namespace Mongo.Context.Mapping
             TimeToLive = -1;
         }
         public ICollection<string> Keys { get; set; }
-        public bool Desending { get; set; }
+        public bool Descending { get; set; }
         public bool Unique { get; set; }
         public int TimeToLive { get; set; }
     }
