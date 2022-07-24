@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Mongo.Context.Internal
+namespace Mongo.Context.Internal;
+
+public interface IEntityType
 {
-    public interface IEntityType
-    {
-        string Name { get; }
-        IEntityType BaseType { get; }
-        Type ClrType { get; }
-    }
+    string Name { get; }
+    IEntityType BaseType { get; }
+    Type ClrType { get; }
 }
+

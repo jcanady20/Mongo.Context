@@ -1,7 +1,7 @@
-﻿namespace Mongo.Context.Internal
+﻿namespace Mongo.Context.Internal;
+
+public interface IPropertySetter
 {
-    public interface IPropertySetter
-    {
-        void SetValue(object instance, object value);
-    }
+    void SetValue(object instance, object value);
 }
+

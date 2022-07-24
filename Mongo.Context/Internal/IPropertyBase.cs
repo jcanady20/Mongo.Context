@@ -1,8 +1,8 @@
-﻿namespace Mongo.Context.Internal
+﻿namespace Mongo.Context.Internal;
+
+public interface IPropertyBase
 {
-    public interface IPropertyBase
-    {
-        string Name { get; }
-        IEntityType DeclaringEntityType { get; }
-    }
+    string Name { get; }
+    IEntityType DeclaringEntityType { get; }
 }
+

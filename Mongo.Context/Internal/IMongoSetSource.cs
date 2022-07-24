@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace Mongo.Context.Internal
+namespace Mongo.Context.Internal;
+
+public interface IMongoSetSource
 {
-    public interface IMongoSetSource
-    {
-        object Create(MongoContext context, string collectionName, Type type);
-    }
+    object Create(MongoContext context, string collectionName, Type type);
 }
+

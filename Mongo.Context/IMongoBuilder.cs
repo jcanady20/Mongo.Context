@@ -1,18 +1,16 @@
 ﻿using Mongo.Context.Mapping;
 using System.Reflection;
 
-namespace Mongo.Context
+namespace Mongo.Context;
+public interface IMongoBuilder
 {
-    public interface IMongoBuilder
-    {
-        bool IsFrozen { get; }
+    bool IsFrozen { get; }
 
-        MongoClassMap<T> Entry<T>();
+    MongoClassMap<T> Entry<T>();
 
-        void FromAssembly(Assembly assembly);
+    void FromAssembly(Assembly assembly);
 
-        void InitializeIndexes();
+    void InitializeIndexes();
 
-        void InitializeSets();
-    }
+    void InitializeSets();
 }

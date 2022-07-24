@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+
 namespace System.Data.Entity.Design.PluralizationServices;
 
 public abstract class PluralizationService
@@ -8,6 +12,22 @@ public abstract class PluralizationService
     public abstract bool IsSingular(string word);
     public abstract string Pluralize(string word);
     public abstract string Singularize(string word);
+    public abstract void AddWord(string singular, string plural);
+
+    protected static bool DoesWordContainSuffix(string word, IEnumerable<string> suffixes, CultureInfo culture) => suffixes.Any(s => word.EndsWith(s, true, culture));
+    protected static bool TryInflectOnSuffixInWord(string word, IEnumerable<string> suffixes, Func<string, string> operationOnWord, CultureInfo culture, out string newWord)
+    {
+        newWord = null;
+        if (DoesWordContainSuffix(word, suffixes, culture))
+        {
+            newWord = operationOnWord(word);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
 
     /// <summary>
     /// Factory method for PluralizationService. Only support english pluralization.

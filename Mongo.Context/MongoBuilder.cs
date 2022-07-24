@@ -4,78 +4,76 @@ using System.Linq;
 using System.Reflection;
 using Mongo.Context.Mapping;
 
-namespace Mongo.Context
+namespace Mongo.Context;
+public class MongoBuilder : IMongoBuilder
 {
-    public class MongoBuilder : IMongoBuilder
+    private Type _contextType;
+    private MongoContext _context;
+    private readonly static IDictionary<Type, MongoClassMap> _typeClassMaps = new Dictionary<Type, MongoClassMap>();
+    private readonly Internal.IMongoSetFinder _setFinder;
+    public MongoBuilder(MongoContext context)
     {
-        private Type _contextType;
-        private MongoContext _context;
-        private readonly static IDictionary<Type, MongoClassMap> _typeClassMaps = new Dictionary<Type, MongoClassMap>();
-        private readonly Internal.IMongoSetFinder _setFinder;
-        public MongoBuilder(MongoContext context)
-        {
-            _contextType = context.GetType();
-            _context = context;
-            _setFinder = new Internal.MongoSetFinder();
-        }
+        _contextType = context.GetType();
+        _context = context;
+        _setFinder = new Internal.MongoSetFinder();
+    }
 
-        public bool IsFrozen
+    public bool IsFrozen
+    {
+        get
         {
-            get
+            return _typeClassMaps.Values.Any(x => x.IsFrozen);
+        }
+    }
+
+    public void InitializeSets()
+    {
+        var setSource = new Internal.MongoSetSource();
+        var setInitializer = new Internal.MongoSetInitializer(_setFinder, setSource);
+        setInitializer.InitializeSets(_context, _typeClassMaps);
+    }
+
+    public void InitializeIndexes()
+    {
+        foreach (var setinfo in _setFinder.FindSets(_context))
+        {
+            var mcm = _typeClassMaps[setinfo.EntityType];
+            if(mcm == null)
             {
-                return _typeClassMaps.Values.Any(x => x.IsFrozen);
+                continue;
             }
+            _context.EnsureIndexes(mcm.CollectionName, mcm.Indexes);
         }
+    }
 
-        public void InitializeSets()
-        {
-            var setSource = new Internal.MongoSetSource();
-            var setInitializer = new Internal.MongoSetInitializer(_setFinder, setSource);
-            setInitializer.InitializeSets(_context, _typeClassMaps);
-        }
+    public MongoClassMap<T> Entry<T>()
+    {
+        return (MongoClassMap<T>)_typeClassMaps[typeof(T)];
+    }
 
-        public void InitializeIndexes()
+    public void FromAssembly(Assembly assembly)
+    {
+        var classMaps = assembly.GetTypes().Where(x => x.IsClass && x.IsSubclassOf(typeof(MongoClassMap)));
+        foreach (var cm in classMaps)
         {
-            foreach (var setinfo in _setFinder.FindSets(_context))
+            var baseType = cm.BaseType;
+            //  Check to see if this type has already been registred
+            if (baseType.IsGenericType)
             {
-                var mcm = _typeClassMaps[setinfo.EntityType];
-                if(mcm == null)
+                var AssignableType = baseType.GetGenericArguments().First();
+                if (MongoClassMap.IsClassMapRegistered(AssignableType))
                 {
                     continue;
                 }
-                _context.EnsureIndexes(mcm.CollectionName, mcm.Indexes);
             }
+            var instance = (MongoClassMap)Activator.CreateInstance(cm);
+            MongoClassMap.RegisterClassMap(instance);
+            _typeClassMaps.Add(instance.ClassType, instance);
         }
+    }
 
-        public MongoClassMap<T> Entry<T>()
-        {
-            return (MongoClassMap<T>)_typeClassMaps[typeof(T)];
-        }
-
-        public void FromAssembly(Assembly assembly)
-        {
-            var classMaps = assembly.GetTypes().Where(x => x.IsClass && x.IsSubclassOf(typeof(MongoClassMap)));
-            foreach (var cm in classMaps)
-            {
-                var baseType = cm.BaseType;
-                //  Check to see if this type has already been registred
-                if (baseType.IsGenericType)
-                {
-                    var AssignableType = baseType.GetGenericArguments().First();
-                    if (MongoClassMap.IsClassMapRegistered(AssignableType))
-                    {
-                        continue;
-                    }
-                }
-                var instance = (MongoClassMap)Activator.CreateInstance(cm);
-                MongoClassMap.RegisterClassMap(instance);
-                _typeClassMaps.Add(instance.ClassType, instance);
-            }
-        }
-
-        public static MongoClassMap LookupClassMap(Type type)
-        {
-            return _typeClassMaps[type];
-        }
+    public static MongoClassMap LookupClassMap(Type type)
+    {
+        return _typeClassMaps[type];
     }
 }

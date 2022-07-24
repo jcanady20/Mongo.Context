@@ -11,6 +11,7 @@ namespace Mongo.Context.Example
 
         protected override void OnRegisterClasses(MongoBuilder mongoBuilder)
         {
+            //  dynamically Load class maps from ./Maps
             mongoBuilder.FromAssembly(typeof(Context).Assembly);
 
             //  Manual Mapping for an Element
@@ -20,11 +21,13 @@ namespace Mongo.Context.Example
             clsmap.MapProperty(x => x.Gender)
                 .SetElementName("g");
             //  Adding an Index to a Collection
-            mongoBuilder.Entry<Entities.Contact>()
-                .Indexes = new[] {
+            mongoBuilder
+                .Entry<Entities.Contact>()
+                .Indexes = new [] {
                     new MongoIndex() { Keys = new[] { "Name" } }
                 };
-            mongoBuilder.Entry<Entities.Contact>()
+            mongoBuilder
+                .Entry<Entities.Contact>()
                 .AddIndex(new MongoIndex()
                 {
                     Keys = new[] { "Phone" }
