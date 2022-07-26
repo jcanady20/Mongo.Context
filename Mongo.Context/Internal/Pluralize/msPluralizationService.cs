@@ -23,10 +23,7 @@ public abstract class PluralizationService
             newWord = operationOnWord(word);
             return true;
         }
-        else
-        {
-            return false;
-        }
+        return false;
     }
 
     /// <summary>
