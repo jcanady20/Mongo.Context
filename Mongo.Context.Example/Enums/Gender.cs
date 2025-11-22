@@ -1,10 +1,10 @@
-﻿namespace Mongo.Context.Example
+﻿namespace Mongo.Context.Example;
+
+public enum Gender
 {
-    public enum Gender
-    {
-        Unknown,
-        Male,
-        Female,
-        Snowflake
-    }
+    Unknown,
+    Male,
+    Female,
+    Snowflake
 }
+

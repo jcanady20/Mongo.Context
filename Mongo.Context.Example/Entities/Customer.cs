@@ -1,8 +1,8 @@
-﻿namespace Mongo.Context.Example.Entities
+﻿namespace Mongo.Context.Example.Entities;
+
+public class Customer
 {
-    public class Customer
-    {
-        public string Id { get; set; }
-        public string Name { get; set; }
-    }
+    public string Id { get; set; }
+    public string Name { get; set; }
 }
+
